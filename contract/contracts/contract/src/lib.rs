@@ -1,81 +1,23 @@
 #![no_std]
-
-use soroban_sdk::{
-    contract, contractimpl, contracttype, Env, Address, Symbol, Vec,
-};
-
-#[contracttype]
-#[derive(Clone)]
-pub struct Subscription {
-    pub subscriber: Address,
-    pub amount: i128,
-    pub interval: u64, // in seconds
-    pub last_payment: u64,
-}
+use soroban_sdk::{contract, contractimpl, vec, Env, String, Vec};
 
 #[contract]
-pub struct SubscriptionContract;
+pub struct Contract;
 
+// This is a sample contract. Replace this placeholder with your own contract logic.
+// A corresponding test example is available in `test.rs`.
+//
+// For comprehensive examples, visit <https://github.com/stellar/soroban-examples>.
+// The repository includes use cases for the Stellar ecosystem, such as data storage on
+// the blockchain, token swaps, liquidity pools, and more.
+//
+// Refer to the official documentation:
+// <https://developers.stellar.org/docs/build/smart-contracts/overview>.
 #[contractimpl]
-impl SubscriptionContract {
-
-    // Create a new subscription
-    pub fn create_subscription(
-        env: Env,
-        subscriber: Address,
-        amount: i128,
-        interval: u64,
-    ) {
-        subscriber.require_auth();
-
-        let current_time = env.ledger().timestamp();
-
-        let sub = Subscription {
-            subscriber: subscriber.clone(),
-            amount,
-            interval,
-            last_payment: current_time,
-        };
-
-        env.storage().persistent().set(&subscriber, &sub);
-    }
-
-    // Pay subscription
-    pub fn pay(env: Env, subscriber: Address) {
-        subscriber.require_auth();
-
-        let mut sub: Subscription = env
-            .storage()
-            .persistent()
-            .get(&subscriber)
-            .expect("Subscription not found");
-
-        let current_time = env.ledger().timestamp();
-
-        if current_time < sub.last_payment + sub.interval {
-            panic!("Too early to pay");
-        }
-
-        // NOTE: Payment logic (token transfer) should be added here
-        // using Soroban token interface
-
-        sub.last_payment = current_time;
-
-        env.storage().persistent().set(&subscriber, &sub);
-    }
-
-    // Cancel subscription
-    pub fn cancel(env: Env, subscriber: Address) {
-        subscriber.require_auth();
-
-        env.storage().persistent().remove(&subscriber);
-    }
-
-    // View subscription
-    pub fn get_subscription(env: Env, subscriber: Address) -> Subscription {
-        env.storage()
-            .persistent()
-            .get(&subscriber)
-            .expect("Subscription not found")
+impl Contract {
+    pub fn hello(env: Env, to: String) -> Vec<String> {
+        vec![&env, String::from_str(&env, "Hello"), to]
     }
 }
+
+mod test;
